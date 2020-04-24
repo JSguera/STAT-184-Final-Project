@@ -1,0 +1,143 @@
+---
+title: "STAT 184 Final Project" 
+author: "Jonathan Sguera"
+output: html_notebook
+---
+
+
+
+```{r}
+# clean up workspace environment
+rm(list = ls())
+
+# all packages used for the assignment
+library(mosaic)
+library(tidyverse)
+library(DataComputing)
+```
+
+
+```{r}
+# Here I am reading in the data from the website link I found it at datahub.io, I have taken in 4 seasons of data
+Serie_A18_19Season <- read.csv("https://datahub.io/sports-data/italian-serie-a/r/season-1819.csv")
+Serie_A17_18Season <- read.csv("https://datahub.io/sports-data/italian-serie-a/r/season-1718.csv")
+Serie_A16_17Season <- read.csv("https://datahub.io/sports-data/italian-serie-a/r/season-1617.csv")
+Serie_A15_16Season <- read.csv("https://datahub.io/sports-data/italian-serie-a/r/season-1516.csv")
+# Here I am cleaning up the data to be more understandable and clean, changing abbreviated varibles to be more descriptive and only selecting variables that do not involve betting odds
+# 2018/19 Season Data
+SerieA2018_2019_SeasonClean <- Serie_A18_19Season %>%
+  select(Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,HTHG,HTAG,HTR,HS,AS,HST,AST,HF,AF,HC,AC,HY,AY,HR,AR) %>%
+  mutate(FTTG = FTAG + FTHG,
+         HTTG = HTAG + HTHG,
+         GD = FTAG - FTHG,
+         Season = "18/19") %>%
+  rename(FullTimeHomeGoals = FTHG, 
+         FullTimeAwayGoals = FTAG,
+         FullTimeTotalGoals = FTTG,
+         FullTimeResult = FTR,
+         HalfTimeHomeGoals = HTHG,
+         HalfTimeAwayGoals = HTAG,
+         HalfTimeTotalGoals = HTTG,
+         HalfTimeResult = HTR,
+         HomeTeamShots = HS,
+         AwayTeamShots = AS,
+         HomeTeamShotsOnTarget = HST,
+         AwayTeamShotsOnTarget = AST,
+         HomeTeamFouls = HF,
+         AwayTeamFouls = AF,
+         HomeTeamCorners = HC,
+         AwayTeamCorners = AC,
+         HomeTeamYellowCards = HY,
+         AwayTeamYellowCards = AY,
+         HomeTeamRedCards = HR,
+         AwayTeamRedCards = AR,
+         GoalDifferential = GD)
+# 2017/18 Season Data
+SerieA2017_2018_SeasonClean <- Serie_A17_18Season %>%
+  select(Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,HTHG,HTAG,HTR,HS,AS,HST,AST,HF,AF,HC,AC,HY,AY,HR,AR) %>%
+  mutate(FTTG = FTAG + FTHG,
+         HTTG = HTAG + HTHG,
+         GD = FTAG - FTHG,
+         Season = "17/18") %>%
+  rename(FullTimeHomeGoals = FTHG, 
+         FullTimeAwayGoals = FTAG,
+         FullTimeTotalGoals = FTTG,
+         FullTimeResult = FTR,
+         HalfTimeHomeGoals = HTHG,
+         HalfTimeAwayGoals = HTAG,
+         HalfTimeTotalGoals = HTTG,
+         HalfTimeResult = HTR,
+         HomeTeamShots = HS,
+         AwayTeamShots = AS,
+         HomeTeamShotsOnTarget = HST,
+         AwayTeamShotsOnTarget = AST,
+         HomeTeamFouls = HF,
+         AwayTeamFouls = AF,
+         HomeTeamCorners = HC,
+         AwayTeamCorners = AC,
+         HomeTeamYellowCards = HY,
+         AwayTeamYellowCards = AY,
+         HomeTeamRedCards = HR,
+         AwayTeamRedCards = AR,
+         GoalDifferential = GD)
+# 2016/17 Season Data
+SerieA2016_2017_SeasonClean <- Serie_A16_17Season %>%
+  select(Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,HTHG,HTAG,HTR,HS,AS,HST,AST,HF,AF,HC,AC,HY,AY,HR,AR) %>%
+  mutate(FTTG = FTAG + FTHG,
+         HTTG = HTAG + HTHG,
+         GD = FTAG - FTHG,
+         Season = "16/17") %>%
+  rename(FullTimeHomeGoals = FTHG, 
+         FullTimeAwayGoals = FTAG,
+         FullTimeTotalGoals = FTTG,
+         FullTimeResult = FTR,
+         HalfTimeHomeGoals = HTHG,
+         HalfTimeAwayGoals = HTAG,
+         HalfTimeTotalGoals = HTTG,
+         HalfTimeResult = HTR,
+         HomeTeamShots = HS,
+         AwayTeamShots = AS,
+         HomeTeamShotsOnTarget = HST,
+         AwayTeamShotsOnTarget = AST,
+         HomeTeamFouls = HF,
+         AwayTeamFouls = AF,
+         HomeTeamCorners = HC,
+         AwayTeamCorners = AC,
+         HomeTeamYellowCards = HY,
+         AwayTeamYellowCards = AY,
+         HomeTeamRedCards = HR,
+         AwayTeamRedCards = AR,
+         GoalDifferential = GD)
+# 2015/17 Season Data
+SerieA2015_2016_SeasonClean <- Serie_A15_16Season %>%
+  select(Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,HTHG,HTAG,HTR,HS,AS,HST,AST,HF,AF,HC,AC,HY,AY,HR,AR) %>%
+  mutate(FTTG = FTAG + FTHG,
+         HTTG = HTAG + HTHG,
+         GD = FTAG - FTHG,
+         Season = "15/16") %>%
+  rename(FullTimeHomeGoals = FTHG, 
+         FullTimeAwayGoals = FTAG,
+         FullTimeTotalGoals = FTTG,
+         FullTimeResult = FTR,
+         HalfTimeHomeGoals = HTHG,
+         HalfTimeAwayGoals = HTAG,
+         HalfTimeTotalGoals = HTTG,
+         HalfTimeResult = HTR,
+         HomeTeamShots = HS,
+         AwayTeamShots = AS,
+         HomeTeamShotsOnTarget = HST,
+         AwayTeamShotsOnTarget = AST,
+         HomeTeamFouls = HF,
+         AwayTeamFouls = AF,
+         HomeTeamCorners = HC,
+         AwayTeamCorners = AC,
+         HomeTeamYellowCards = HY,
+         AwayTeamYellowCards = AY,
+         HomeTeamRedCards = HR,
+         AwayTeamRedCards = AR,
+         GoalDifferential = GD)
+CombinedData <- SerieA2018_2019_SeasonClean %>%
+  rbind(SerieA2017_2018_SeasonClean,SerieA2016_2017_SeasonClean,SerieA2015_2016_SeasonClean) %>%
+  select(Date,Season,HomeTeam,AwayTeam,FullTimeHomeGoals,FullTimeAwayGoals,FullTimeResult,FullTimeTotalGoals,HalfTimeHomeGoals,HalfTimeAwayGoals,HalfTimeResult,HalfTimeTotalGoals,HomeTeamShots,AwayTeamShots,HomeTeamShotsOnTarget,AwayTeamShotsOnTarget,HomeTeamFouls,AwayTeamFouls,HomeTeamCorners,AwayTeamCorners,HomeTeamYellowCards,AwayTeamYellowCards,HomeTeamRedCards,AwayTeamRedCards)
+```
+
