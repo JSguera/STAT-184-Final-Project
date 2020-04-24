@@ -1,0 +1,289 @@
+---
+title: "STAT 184 Final Project" 
+subtitle: "EDA"
+author: "Jonathan Sguera"
+output: html_notebook
+---
+
+
+
+## Guiding Question: 
+Do English Premier League matches have higher Full Time Total goals on average than Italian Serie A matches?
+
+```{r}
+# clean up workspace environment
+rm(list = ls())
+
+# all packages used for the assignment
+library(mosaic)
+library(tidyverse)
+library(DataComputing)
+
+```
+
+## Acquainted with Data sources:
+```{r}
+# Here I am reading in the data from the website link I found it at
+Serie_A_Data <- read.csv("https://datahub.io/sports-data/italian-serie-a/r/season-1819.csv")
+Premier_League_Data <- read.csv("https://datahub.io/sports-data/english-premier-league/r/season-1819.csv")
+```
+
+### Where did you find them?
+I found these data tables from datahub.io and I only included data from the 2018-19 season.
+
+### Who collected/maintains them?
+Data comes from football-data.co.uk which is a English website which gathers match data including betting odds to help gamblers decide which bets to make. 
+### When & why were they originally collected?
+* Below I have added a key from football-data.co.uk which explains where all data came from and includes betting odds from multiple websites. THe original data seems to have been collected to help fans determine which matches to bet on and which website to use for avid European Soccer gamblers.
+
+Key to results data:
+
+Div = League Division
+Date = Match Date (dd/mm/yy)
+HomeTeam = Home Team
+AwayTeam = Away Team
+FTHG = Full Time Home Team Goals
+FTAG = Full Time Away Team Goals
+FTR = Full Time Result (H=Home Win, D=Draw, A=Away Win)
+HTHG = Half Time Home Team Goals
+HTAG = Half Time Away Team Goals
+HTR = Half Time Result (H=Home Win, D=Draw, A=Away Win)
+
+Match Statistics (where available)
+Attendance = Crowd Attendance
+Referee = Match Referee
+HS = Home Team Shots
+AS = Away Team Shots
+HST = Home Team Shots on Target
+AST = Away Team Shots on Target
+HHW = Home Team Hit Woodwork
+AHW = Away Team Hit Woodwork
+HC = Home Team Corners
+AC = Away Team Corners
+HF = Home Team Fouls Committed
+AF = Away Team Fouls Committed
+HO = Home Team Offsides
+AO = Away Team Offsides
+HY = Home Team Yellow Cards
+AY = Away Team Yellow Cards
+HR = Home Team Red Cards
+AR = Away Team Red Cards
+HBP = Home Team Bookings Points (10 = yellow, 25 = red)
+ABP = Away Team Bookings Points (10 = yellow, 25 = red)
+
+Key to 1X2 (match) betting odds data:
+
+B365H = Bet365 home win odds
+B365D = Bet365 draw odds
+B365A = Bet365 away win odds
+BSH = Blue Square home win odds
+BSD = Blue Square draw odds
+BSA = Blue Square away win odds
+BWH = Bet&Win home win odds
+BWD = Bet&Win draw odds
+BWA = Bet&Win away win odds
+GBH = Gamebookers home win odds
+GBD = Gamebookers draw odds
+GBA = Gamebookers away win odds
+IWH = Interwetten home win odds
+IWD = Interwetten draw odds
+IWA = Interwetten away win odds
+LBH = Ladbrokes home win odds
+LBD = Ladbrokes draw odds
+LBA = Ladbrokes away win odds
+PSH = Pinnacle Sports home win odds
+PSD = Pinnacle Sports draw odds
+PSA = Pinnacle Sports away win odds
+SOH = Sporting Odds home win odds
+SOD = Sporting Odds draw odds
+SOA = Sporting Odds away win odds
+SBH = Sportingbet home win odds
+SBD = Sportingbet draw odds
+SBA = Sportingbet away win odds
+SJH = Stan James home win odds
+SJD = Stan James draw odds
+SJA = Stan James away win odds
+SYH = Stanleybet home win odds
+SYD = Stanleybet draw odds
+SYA = Stanleybet away win odds
+VCH = VC Bet home win odds
+VCD = VC Bet draw odds
+VCA = VC Bet away win odds
+WHH = William Hill home win odds
+WHD = William Hill draw odds
+WHA = William Hill away win odds
+
+Bb1X2 = Number of BetBrain bookmakers used to calculate match odds averages and maximums
+BbMxH = Betbrain maximum home win odds
+BbAvH = Betbrain average home win odds
+BbMxD = Betbrain maximum draw odds
+BbAvD = Betbrain average draw win odds
+BbMxA = Betbrain maximum away win odds
+BbAvA = Betbrain average away win odds
+
+
+
+Key to total goals betting odds:
+
+BbOU = Number of BetBrain bookmakers used to calculate over/under 2.5 goals (total goals) averages and maximums
+BbMx>2.5 = Betbrain maximum over 2.5 goals
+BbAv>2.5 = Betbrain average over 2.5 goals
+BbMx<2.5 = Betbrain maximum under 2.5 goals
+BbAv<2.5 = Betbrain average under 2.5 goals
+
+GB>2.5 = Gamebookers over 2.5 goals
+GB<2.5 = Gamebookers under 2.5 goals
+B365>2.5 = Bet365 over 2.5 goals
+B365<2.5 = Bet365 under 2.5 goals
+
+
+Key to Asian handicap betting odds:
+
+BbAH = Number of BetBrain bookmakers used to Asian handicap averages and maximums
+BbAHh = Betbrain size of handicap (home team)
+BbMxAHH = Betbrain maximum Asian handicap home team odds
+BbAvAHH = Betbrain average Asian handicap home team odds
+BbMxAHA = Betbrain maximum Asian handicap away team odds
+BbAvAHA = Betbrain average Asian handicap away team odds
+
+GBAHH = Gamebookers Asian handicap home team odds
+GBAHA = Gamebookers Asian handicap away team odds
+GBAH = Gamebookers size of handicap (home team)
+LBAHH = Ladbrokes Asian handicap home team odds
+LBAHA = Ladbrokes Asian handicap away team odds
+LBAH = Ladbrokes size of handicap (home team)
+B365AHH = Bet365 Asian handicap home team odds
+B365AHA = Bet365 Asian handicap away team odds
+B365AH = Bet365 size of handicap (home team)
+
+Football-Data would like to acknowledge the following sources which have been utilised in the compilation of Football-Data's results and odds files.
+
+Historical results:
+International Soccer Server - http://sunsite.tut.fi/rec/riku/soccer.html
+European Football - http://www.eurofootball.be/
+RSSSF Archive - http://www.rsssf.com/
+
+Current results (full time, half time)
+TBWSport - http://www.tbwsport.com
+Livescore- http://www.livescore.com
+
+Match statistics
+Sportinglife, ESPN Soccer, Bundesliga.de, Gazzetta.it and Football.fr
+
+Bookmakers betting odds
+Betbrain - http://www.betbrain.com
+Betbase - http://www.betbase.info
+
+Betting odds for weekend games are collected Friday afternoons, and on Tuesday afternoons for midweek games.
+
+Additional match statistics (corners, shots, bookings, referee etc.) for the 2000/01 and 2001/02 seasons for the English, Scottish and German leagues were provided by Sports.com (now under new ownership and no longer available).
+
+### What does a case represent in each data source, and how many total cases are available?
+A case represents one match played and there are 380 total cases in each dataset.
+
+### What are some of the variables that you plan to use?
+I plan on using FTAG,and FTHG which are: Full Time Away Goals and Full Time Home goals respectively. I will mutate a new variable FTTG: Full Time Total Goals, which will be the sum of the two variables for each case. I will also create HTTG: Half Time Total Goals to see total number of goals scored at the end of half time. I will also create GD: Goal Differential which will be the difference in score at the end of the game, a negative GD means a loss, and a positive GD means a win, while a 0 GD means a tie. I also renamed all of the non-betting variables I will be including to longer more explanatory variable names. From these variables I will group_by HomeTeam and select variables such that only home team data will be taken, and calculate an average total goals scored for home games of each teach and average goal differential for home games of each team.
+```{r}
+SerieAClean <- Serie_A_Data %>%
+  select(Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,HTHG,HTAG,HTR,HS,AS,HST,AST,HF,AF,HC,AC,HY,AY,HR,AR) %>%
+  mutate(FTTG = FTAG + FTHG,
+         HTTG = HTAG + HTHG,
+         GD = FTAG - FTHG) %>%
+  rename(FullTimeHomeGoals = FTHG, 
+         FullTimeAwayGoals = FTAG,
+         FullTimeTotalGoals = FTTG,
+         FullTimeResult = FTR,
+         HalfTimeHomeGoals = HTHG,
+         HalfTimeAwayGoals = HTAG,
+         HalfTimeTotalGoals = HTTG,
+         HalfTimeResult = HTR,
+         HomeTeamShots = HS,
+         AwayTeamShots = AS,
+         HomeTeamShotsOnTarget = HST,
+         AwayTeamShotsOnTarget = AST,
+         HomeTeamFouls = HF,
+         AwayTeamFouls = AF,
+         HomeTeamCorners = HC,
+         AwayTeamCorners = AC,
+         HomeTeamYellowCards = HY,
+         AwayTeamYellowCards = AY,
+         HomeTeamRedCards = HR,
+         AwayTeamRedCards = AR,
+         GoalDifferential = GD) %>%
+  mutate(matchnum = row_number())
+SerieAClean
+PremierLeagueClean <- Premier_League_Data %>%
+  select(Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,HTHG,HTAG,HTR,HS,AS,HST,AST,HF,AF,HC,AC,HY,AY,HR,AR) %>%
+  mutate(FTTG = FTAG + FTHG,
+         HTTG = HTAG + HTHG,
+         GD = FTAG - FTHG) %>%
+  rename(FullTimeHomeGoals = FTHG, 
+         FullTimeAwayGoals = FTAG,
+         FullTimeTotalGoals = FTTG,
+         FullTimeResult = FTR,
+         HalfTimeHomeGoals = HTHG,
+         HalfTimeAwayGoals = HTAG,
+         HalfTimeTotalGoals = HTTG,
+         HalfTimeResult = HTR,
+         HomeTeamShots = HS,
+         AwayTeamShots = AS,
+         HomeTeamShotsOnTarget = HST,
+         AwayTeamShotsOnTarget = AST,
+         HomeTeamFouls = HF,
+         AwayTeamFouls = AF,
+         HomeTeamCorners = HC,
+         AwayTeamCorners = AC,
+         HomeTeamYellowCards = HY,
+         AwayTeamYellowCards = AY,
+         HomeTeamRedCards = HR,
+         AwayTeamRedCards = AR,
+         GoalDifferential = GD) %>%
+  mutate(matchnum = row_number())
+PremierLeagueClean
+SerieAHome <- SerieAClean %>%
+  select(Date,HomeTeam,FullTimeHomeGoals,FullTimeTotalGoals,FullTimeResult,HalfTimeHomeGoals,HalfTimeTotalGoals,GoalDifferential)%>%
+  group_by(HomeTeam) %>%
+  summarise(avgTotalGoals = mean(FullTimeTotalGoals),
+            avgGoalDiff = mean(GoalDifferential)) %>%
+  mutate(matchnum = row_number())
+SerieAHome
+
+PremierLeagueHome <- PremierLeagueClean %>%
+  select(Date,HomeTeam,FullTimeHomeGoals,FullTimeTotalGoals,FullTimeResult,HalfTimeHomeGoals,HalfTimeTotalGoals,GoalDifferential)%>%
+  group_by(HomeTeam) %>%
+  summarise(avgTotalGoals = mean(FullTimeTotalGoals),
+            avgGoalDiff = mean(GoalDifferential)) %>%
+  mutate(matchnum = row_number())
+PremierLeagueHome
+```
+
+
+
+```{r}
+ggplot(data=SerieAHome,aes(x=avgTotalGoals))+
+  geom_density()
+
+ggplot(data=PremierLeagueHome,aes(x=avgTotalGoals))+
+  geom_density()
+```
+* These two Density plots show that the most common total goals for SerieA games is about 2.45, and most  ommon total goals for Premier League games is around 2.95, so initially it seems that Premier League matches have more goals.
+
+
+```{r}
+ggplot(data=SerieAHome,aes(y=avgTotalGoals))+
+  geom_boxplot()
+
+ggplot(data=PremierLeagueHome,aes(y=avgTotalGoals))+
+  geom_boxplot()
+
+```
+* this Boxplot shows that SerieA games have a wider range with lower minimums for goals scored than games in the Premier League and similar maximums
+
+
+
+```{r}
+combineddata <- rbind(SerieAHome, PremierLeagueHome)
+```
+
+
+
