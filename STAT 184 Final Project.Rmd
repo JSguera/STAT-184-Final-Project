@@ -3,9 +3,8 @@ title: "STAT 184 Final Project"
 author: "Jonathan Sguera"
 output: html_notebook
 ---
-
-
-
+### Research Question: What are significant predictors of goals in a Italian Serie A match?
+The Data I chose for this project is Data from Italian Serie A matches from the 2015-2016 Season. I want to see what kind of actions are likely to cause a goal, and what might not be likely to cause a goal. If I do find any interesting results from this, I could use it when I play soccer or somehow try to send the results to professional teams if the results are that significant. One challenge I faced with this project was joining my two data sets. The date was the only variable in common, but repeated for games that occured on the same day which caused the join to copy the first case that happened on that date for all games that occured on the day. To fix this I created a new variable called Matchup which combined the home team and away team with a vs. in the middle to create a unique variable for each game. When I tried to join here, I noticed that many of the team names for my european data from kaggle used Italian names which differed from the other one. I had to gsub all 20 teams in both the home team and away team variable to match before creating the matchup variable. I also had trouble trying to seperate data for home matches and away matches, since I would have to take some data from 2 different variables.
 ```{r}
 # clean up workspace environment
 rm(list = ls())
@@ -14,107 +13,69 @@ rm(list = ls())
 library(mosaic)
 library(tidyverse)
 library(DataComputing)
+library(lubridate)
 ```
 
-
 ```{r}
-# Here I am reading in the data from the website link I found it at datahub.io, I have taken in 4 seasons of data
-Serie_A18_19Season <- read.csv("https://datahub.io/sports-data/italian-serie-a/r/season-1819.csv")
-Serie_A17_18Season <- read.csv("https://datahub.io/sports-data/italian-serie-a/r/season-1718.csv")
-Serie_A16_17Season <- read.csv("https://datahub.io/sports-data/italian-serie-a/r/season-1617.csv")
+# Here I am reading in the data from the website link I found it at datahub.io, I have taken the data from teh 2015-2016 season
 Serie_A15_16Season <- read.csv("https://datahub.io/sports-data/italian-serie-a/r/season-1516.csv")
-# Here I am cleaning up the data to be more understandable and clean, changing abbreviated varibles to be more descriptive and only selecting variables that do not involve betting odds
-# 2018/19 Season Data
-SerieA2018_2019_SeasonClean <- Serie_A18_19Season %>%
-  select(Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,HTHG,HTAG,HTR,HS,AS,HST,AST,HF,AF,HC,AC,HY,AY,HR,AR) %>%
-  mutate(FTTG = FTAG + FTHG,
-         HTTG = HTAG + HTHG,
-         GD = FTAG - FTHG,
-         Season = "18/19") %>%
-  rename(FullTimeHomeGoals = FTHG, 
-         FullTimeAwayGoals = FTAG,
-         FullTimeTotalGoals = FTTG,
-         FullTimeResult = FTR,
-         HalfTimeHomeGoals = HTHG,
-         HalfTimeAwayGoals = HTAG,
-         HalfTimeTotalGoals = HTTG,
-         HalfTimeResult = HTR,
-         HomeTeamShots = HS,
-         AwayTeamShots = AS,
-         HomeTeamShotsOnTarget = HST,
-         AwayTeamShotsOnTarget = AST,
-         HomeTeamFouls = HF,
-         AwayTeamFouls = AF,
-         HomeTeamCorners = HC,
-         AwayTeamCorners = AC,
-         HomeTeamYellowCards = HY,
-         AwayTeamYellowCards = AY,
-         HomeTeamRedCards = HR,
-         AwayTeamRedCards = AR,
-         GoalDifferential = GD)
-# 2017/18 Season Data
-SerieA2017_2018_SeasonClean <- Serie_A17_18Season %>%
-  select(Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,HTHG,HTAG,HTR,HS,AS,HST,AST,HF,AF,HC,AC,HY,AY,HR,AR) %>%
-  mutate(FTTG = FTAG + FTHG,
-         HTTG = HTAG + HTHG,
-         GD = FTAG - FTHG,
-         Season = "17/18") %>%
-  rename(FullTimeHomeGoals = FTHG, 
-         FullTimeAwayGoals = FTAG,
-         FullTimeTotalGoals = FTTG,
-         FullTimeResult = FTR,
-         HalfTimeHomeGoals = HTHG,
-         HalfTimeAwayGoals = HTAG,
-         HalfTimeTotalGoals = HTTG,
-         HalfTimeResult = HTR,
-         HomeTeamShots = HS,
-         AwayTeamShots = AS,
-         HomeTeamShotsOnTarget = HST,
-         AwayTeamShotsOnTarget = AST,
-         HomeTeamFouls = HF,
-         AwayTeamFouls = AF,
-         HomeTeamCorners = HC,
-         AwayTeamCorners = AC,
-         HomeTeamYellowCards = HY,
-         AwayTeamYellowCards = AY,
-         HomeTeamRedCards = HR,
-         AwayTeamRedCards = AR,
-         GoalDifferential = GD)
-# 2016/17 Season Data
-SerieA2016_2017_SeasonClean <- Serie_A16_17Season %>%
-  select(Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,HTHG,HTAG,HTR,HS,AS,HST,AST,HF,AF,HC,AC,HY,AY,HR,AR) %>%
-  mutate(FTTG = FTAG + FTHG,
-         HTTG = HTAG + HTHG,
-         GD = FTAG - FTHG,
-         Season = "16/17") %>%
-  rename(FullTimeHomeGoals = FTHG, 
-         FullTimeAwayGoals = FTAG,
-         FullTimeTotalGoals = FTTG,
-         FullTimeResult = FTR,
-         HalfTimeHomeGoals = HTHG,
-         HalfTimeAwayGoals = HTAG,
-         HalfTimeTotalGoals = HTTG,
-         HalfTimeResult = HTR,
-         HomeTeamShots = HS,
-         AwayTeamShots = AS,
-         HomeTeamShotsOnTarget = HST,
-         AwayTeamShotsOnTarget = AST,
-         HomeTeamFouls = HF,
-         AwayTeamFouls = AF,
-         HomeTeamCorners = HC,
-         AwayTeamCorners = AC,
-         HomeTeamYellowCards = HY,
-         AwayTeamYellowCards = AY,
-         HomeTeamRedCards = HR,
-         AwayTeamRedCards = AR,
-         GoalDifferential = GD)
-# 2015/17 Season Data
+head(Serie_A15_16Season)
+# here I am reading in the data which includes player and manager level, but filtering for only the 2015/16 season and for italian Serie A league. Then I used gsub to switch the names for teams to be the same as Serie_A15_16Season. I also added a matchup variable which combines home and away teams in a game to make a matchup of the 2 teams variable, which will be used to join the data later
+European_FootballData <- read.csv("KaggleEuropeanData.csv") %>%
+  filter(season == "2015/2016",
+         league == "Serie A") %>%
+  mutate(date = dmy(date),
+         home.name = gsub(pattern = "AS Rom", replacement = "Roma", home.name),
+         home.name = gsub(pattern = "FC Bologna", replacement = "Bologna", home.name),
+         home.name = gsub(pattern = "Udinese Calcio", replacement = "Udinese",home.name),
+         home.name = gsub(pattern = "SSC Neapel", replacement = "Napoli", home.name),
+         home.name = gsub(pattern = "FC Carpi", replacement = "Carpi", home.name),
+         home.name = gsub(pattern = "FC Genua 1893", replacement = "Genoa",home.name),
+         home.name = gsub(pattern = "Atalanta Bergamo", replacement = "Atalanta",home.name),
+         home.name = gsub(pattern = "FC Turin", replacement = "Torino", home.name),
+         home.name = gsub(pattern = "AC Mailand", replacement = "Milan", home.name),
+         home.name = gsub(pattern = "AC Chievo Verona", replacement = "Chievo",home.name),
+         home.name = gsub(pattern = "US Sassuolo Calcio", replacement = "Sassuolo", home.name),
+         home.name = gsub(pattern = "FC Empoli", replacement = "Empoli", home.name),
+         home.name = gsub(pattern = "Juventus Turin", replacement = "Juventus", home.name),
+         home.name = gsub(pattern = "US Palermo", replacement = "Palermo",home.name),
+         home.name = gsub(pattern = "AC Florenze", replacement = "Fiorentina",home.name),
+         home.name = gsub(pattern = "Sampdoria Genua", replacement = "Sampdoria",home.name),
+         home.name = gsub(pattern = "Hellas Verona", replacement = "Verona",home.name),
+         home.name = gsub(pattern = "Lazio Rom", replacement = "Lazio",home.name),
+         home.name = gsub(pattern = "Inter Mailand", replacement = "Inter",home.name),
+         home.name = gsub(pattern = "Frosinone Calcio", replacement = "Frosinone",home.name),
+         away.name = gsub(pattern = "AS Rom", replacement = "Roma",away.name),
+         away.name = gsub(pattern = "FC Bologna", replacement = "Bologna",away.name),
+         away.name = gsub(pattern = "Udinese Calcio", replacement = "Udinese",away.name),
+         away.name = gsub(pattern = "SSC Neapel", replacement = "Napoli",away.name),
+         away.name = gsub(pattern = "FC Carpi", replacement = "Carpi",away.name),
+         away.name = gsub(pattern = "FC Genua 1893", replacement = "Genoa",away.name),
+         away.name = gsub(pattern = "Atalanta Bergamo", replacement = "Atalanta",away.name),
+         away.name = gsub(pattern = "FC Turin", replacement = "Torino",away.name),
+         away.name = gsub(pattern = "AC Mailand", replacement = "Milan",away.name),
+         away.name = gsub(pattern = "AC Chievo Verona", replacement = "Chievo",away.name),
+         away.name = gsub(pattern = "US Sassuolo Calcio", replacement = "Sassuolo",away.name),
+         away.name = gsub(pattern = "FC Empoli", replacement = "Empoli",away.name),
+         away.name = gsub(pattern = "Juventus Turin", replacement = "Juventus",away.name),
+         away.name = gsub(pattern = "US Palermo", replacement = "Palermo",away.name),
+         away.name = gsub(pattern = "AC Florenze", replacement = "Fiorentina",away.name),
+         away.name = gsub(pattern = "Sampdoria Genua", replacement = "Sampdoria",away.name),
+         away.name = gsub(pattern = "Hellas Verona", replacement = "Verona",away.name),
+         away.name = gsub(pattern = "Lazio Rom", replacement = "Lazio",away.name),
+         away.name = gsub(pattern = "Inter Mailand", replacement = "Inter",away.name),
+         away.name = gsub(pattern = "Frosinone Calcio", replacement = "Frosinone",away.name),
+         Matchup = paste(home.name,away.name, sep=" vs. ")) 
+
+# 2015/16 Serie A Season Data cleaned up
 SerieA2015_2016_SeasonClean <- Serie_A15_16Season %>%
   select(Date,HomeTeam,AwayTeam,FTHG,FTAG,FTR,HTHG,HTAG,HTR,HS,AS,HST,AST,HF,AF,HC,AC,HY,AY,HR,AR) %>%
   mutate(FTTG = FTAG + FTHG,
          HTTG = HTAG + HTHG,
-         GD = FTAG - FTHG,
-         Season = "15/16") %>%
+         GD = FTHG - FTAG,
+         League = "Serie A",
+         Matchup = paste(HomeTeam,AwayTeam, sep=" vs. "),
+         Date = dmy(Date)) %>%
   rename(FullTimeHomeGoals = FTHG, 
          FullTimeAwayGoals = FTAG,
          FullTimeTotalGoals = FTTG,
@@ -136,8 +97,78 @@ SerieA2015_2016_SeasonClean <- Serie_A15_16Season %>%
          HomeTeamRedCards = HR,
          AwayTeamRedCards = AR,
          GoalDifferential = GD)
-CombinedData <- SerieA2018_2019_SeasonClean %>%
-  rbind(SerieA2017_2018_SeasonClean,SerieA2016_2017_SeasonClean,SerieA2015_2016_SeasonClean) %>%
-  select(Date,Season,HomeTeam,AwayTeam,FullTimeHomeGoals,FullTimeAwayGoals,FullTimeResult,FullTimeTotalGoals,HalfTimeHomeGoals,HalfTimeAwayGoals,HalfTimeResult,HalfTimeTotalGoals,HomeTeamShots,AwayTeamShots,HomeTeamShotsOnTarget,AwayTeamShotsOnTarget,HomeTeamFouls,AwayTeamFouls,HomeTeamCorners,AwayTeamCorners,HomeTeamYellowCards,AwayTeamYellowCards,HomeTeamRedCards,AwayTeamRedCards)
+# joining the two tables by matchup to add player level, manager level and more variables
+Datajoin <- SerieA2015_2016_SeasonClean %>%
+  left_join(European_FootballData)
+
+# spreading data to have one row for both half time and full time total goals in a game
+DataSpread <- Datajoin %>%
+  gather(key = FullorHalfTime, value = Goals, FullTimeTotalGoals, HalfTimeTotalGoals) %>%
+  select(gameday,home.coach,away.coach,HomeTeam,AwayTeam,FullorHalfTime,Goals) 
+# Head of two data tables before I merged them and then the joined table as well as the narrow spread
+head(European_FootballData)
+head(SerieA2015_2016_SeasonClean)
+head(Datajoin)
+head(DataSpread)
 ```
+* Since there is a home field effect, I will try to do most of my EDA on home team data only. If it shows a relationship for home data, it is likely that it will also show the same outcome for away match data. 
+```{r}
+HomeGoalspergameData <- Datajoin%>%
+  group_by(HomeTeam) %>%
+  summarise(AvgGoalsperGame = mean(FullTimeTotalGoals))
+head(HomeGoalspergameData)
+# boxplot of average goals per game
+ggplot(data=HomeGoalspergameData,aes(y=AvgGoalsperGame))+
+  geom_boxplot()
+# density plot of average goals per game
+ggplot(data=HomeGoalspergameData,aes(x=AvgGoalsperGame))+
+  geom_density()
+
+```
+* This boxplot and density plot show that there are a wide range of goals scored in a game, but the majority of them lie between 2.3 and 2.75 goals in a match on average.
+```{r}
+# creating a plot that shows the relationship between shots on target and goals for the home team
+ggplot(data=Datajoin,aes(x=HomeTeamShots,y=FullTimeHomeGoals))+
+  geom_point(aes(color = HomeTeam)) + 
+  geom_smooth()
+ggplot(data=Datajoin,aes(x=HomeTeamShotsOnTarget,y=FullTimeHomeGoals))+
+  geom_point(aes(color = HomeTeam)) + 
+  geom_smooth()
+```
+* Shots themselves do not seem to be predictors of scoring goals, but have a drop off as they start to shoot a lot of times
+* Shots on target is a very strong predictor of goals scored by a home team. The points show a clear positive relationship, and the smoother shows that it is almost linear and a very strong predictor of scoring a goal
+```{r}
+#Creating a density plot for goals scored at home seperated by result of the match
+HomeTeamPlot <- Datajoin %>%
+  mutate(FullTimeResult = gsub(pattern = "A", replacement = "Loss", FullTimeResult),
+         FullTimeResult = gsub(pattern = "D", replacement = "Draw", FullTimeResult),
+         FullTimeResult = gsub(pattern = "H", replacement = "Win", FullTimeResult))
+head(HomeTeamPlot)
+ggplot(data=HomeTeamPlot, aes(x=FullTimeTotalGoals))+
+  geom_density() +
+  facet_wrap(~FullTimeResult)
+```
+* This graph shows that in a draw there are likely to be less than 3 goals scored by the home team, and are more likely to score more than 3 if they win.
+* This graph doesn't give enough to show whether the result of the match is a good predictor of scoring goals. 
+```{r}
+# creating a plot of crowd size vs goals in a match
+ggplot(data=Datajoin, aes(x=visitor.count,y=FullTimeTotalGoals))+
+  geom_point()+
+  geom_smooth()
+```
+* The amount of people in the crowd of a match does not really seem to have an effect on amount of goals scored in a game.
+```{r}
+# Creating a plot that shows amount of yellow cards vs goals scored for the home team
+ggplot(data = Datajoin, aes(x=HomeTeamYellowCards,y=FullTimeHomeGoals))+
+  geom_point()+
+  geom_smooth()
+# Create another plot that shows red cards vs goals scored for the home team
+ggplot(data = Datajoin, aes(x=HomeTeamRedCards,y=FullTimeHomeGoals))+
+  geom_point()
+```
+* Yellow cards don't seem to have any significant effect on goals scored, but it seems there may be a small effect from yellow cards
+* There are not many points for this, since not many games have red cards let alone more than one. But, there still does seem to be a negative relationship, the more red cards a team gets the less goals they will score.
+
+### Conclusion:
+There only seems to be 2 clear significant predictors of scoring a goal in a match: Shots on target, and Red cards. Since shots on target is a positive predictor, getting more shots on target is the best method for scoring another goal, better than a corner kick, a shot that may be off target, and crowd size. On the other hand Red cards were a very negative predictor, meaning that if a team gets a red card, they are much less likely to score a goal. In conclusion if a team wants to score more goals, they should attempt more shots on target and avoid getting red cards. 
 
